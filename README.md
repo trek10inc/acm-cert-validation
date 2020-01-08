@@ -6,21 +6,24 @@ Made with ❤️ by Trek10. Available on the [AWS Serverless Application Reposit
 
 ## Usage
 
-For each region this is deployed under, you'll see an SSM parameter was created that contains the ARN of the lambda function you must use as the custom resource's `ServiceToken`
-
 ```yml
 Parameters:
-  ValidationFunctionArn:
-    Type: AWS::SSM::Parameter::Value<String>
-    Default: /sar/acm-cert-validation/lambda-arn
   DomainName:
     Type: String
 
 Resources:
+  ACMCertValidation:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:498899591819:applications/acm-cert-validation
+        SemanticVersion: 0.0.0
+
   DNSConfiguration:
     Type: Custom::DNSConfiguration
+    Condition: IsPrimary
     Properties:
-      ServiceToken: !Ref ValidationFunctionArn
+      ServiceToken: !GetAtt ACMCertValidation.Outputs.LambdaArn
       DomainName: !Ref DomainName
 
   SSLCertificate:
