@@ -1,0 +1,26 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+
+Metadata:
+  AWS::ServerlessRepo::Application:
+    Name: acm-cert-validation
+    Description: Lambda to back a custom resource which grabs the dns configuration required to validate ACM Certs
+    Author: Trek10
+    SpdxLicenseId: MIT-0
+    LicenseUrl: LICENSE.txt
+    ReadmeUrl: README.md
+    Labels: ['acm', 'cert', 'validation', 'dns']
+    HomePageUrl: 'https://github.com/trek10inc/acm-cert-validation'
+    SemanticVersion: 0.0.2
+    SourceCodeUrl: 'https://github.com/trek10inc/acm-cert-validation'
+
+
+Resources:
+  ACMCertValidationFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src
+      Handler: index.handler
+      Runtime: python3.6
+      Timeout: 10
