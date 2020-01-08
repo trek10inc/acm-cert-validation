@@ -1,49 +1,47 @@
-# AWS StepFunctions YAML Macro
+# ACM Cert Validation
 
-Use YAML to define your Amazon States Language for your AWS CloudFormation-defined StepFunctions state machines
+Lambda to back a custom resource which grabs the dns configuration required to validate ACM Certs.
 
 Made with ❤️ by Trek10. Available on the [AWS Serverless Application Repository](https://aws.amazon.com/serverless)
 
 ## Usage
 
-After deploying this into your account, you can use the `SFNYAML` transform:
+For each region this is deployed under, you'll see an SSM parameter was created that contains the ARN of the lambda function you must use as the custom resource's `ServiceToken`
 
 ```yml
-Transform: [ AWS::Serverless-2016-10-31, SFNYAML ]
-```
+Parameters:
+  ValidationFunctionArn:
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /sar/acm-cert-validation/lambda-arn
+  DomainName:
+    Type: String
 
-Then you can replace the JSON-defined `DefinitionString` with YAML-defined `DefinitionString` Amazon States Language:
-
-```yml
-  MyStateMachine:
-    Type: AWS::StepFunctions::StateMachine
+Resources:
+  DNSConfiguration:
+    Type: Custom::DNSConfiguration
     Properties:
-      RoleArn: !GetAtt ExecutionRole.Arn
-      # DefinitionString: !Sub |
-      #   {
-      #     "StartAt": "Hello"
-      #     "States": {
-      #       "Hello": {
-      #         "Type": "Task",
-      #         "Resource": "${Function.Arn}",
-      #         "End": true
-      #       }
-      #     }
-      #   }
-      DefinitionString:
-        StartAt: Hello
-        States:
-          Hello:
-            Type: Task
-            Resource: !GetAtt Function.Arn
-            End: true
+      ServiceToken: !Ref ValidationFunctionArn
+      DomainName: !Ref DomainName
+
+  SSLCertificate:
+    Type: AWS::CertificateManager::Certificate
+    Properties:
+      DomainName: !Ref DomainName
+      SubjectAlternativeNames:
+        - !Sub '*.${DomainName}'
+      ValidationMethod: DNS
+
+  RecordSet:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      Comment: For DNS Validation
+      HostedZoneName: !Sub ${DomainName}.
+      Name: !GetAtt DNSConfiguration.Name
+      Type: !GetAtt DNSConfiguration.Type
+      ResourceRecords:
+        - !GetAtt DNSConfiguration.Value
+      TTL: '0'
 ```
-
-All of the CloudFormation intrinsic functions are supported, and used as expected
-
-## Known Issues
-
-- Does not support `AWS::NoValue` being used in the definition
 
 ## License
 
