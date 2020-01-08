@@ -12,7 +12,7 @@ Metadata:
     ReadmeUrl: README.md
     Labels: ['acm', 'cert', 'validation', 'dns']
     HomePageUrl: 'https://github.com/trek10inc/acm-cert-validation'
-    SemanticVersion: 0.0.6
+    SemanticVersion: 0.0.7
     SourceCodeUrl: 'https://github.com/trek10inc/acm-cert-validation'
 
 
@@ -24,14 +24,6 @@ Resources:
       Handler: index.handler
       Runtime: python3.6
       Timeout: 10
-
-  ACMCertValidationSSM:
-    Type: AWS::SSM::Parameter
-    Properties:
-      Type: String
-      Description: The ARN of the ACM Cert Validation Lambda function
-      Name: /sar/acm-cert-validation/lambda-arn
-      Value: !GetAtt ACMCertValidationFunction.Arn
 
 
 Outputs:
