@@ -12,7 +12,7 @@ Metadata:
     ReadmeUrl: README.md
     Labels: ['acm', 'cert', 'validation', 'dns']
     HomePageUrl: 'https://github.com/trek10inc/acm-cert-validation'
-    SemanticVersion: 0.0.7
+    SemanticVersion: 0.0.8
     SourceCodeUrl: 'https://github.com/trek10inc/acm-cert-validation'
 
 
@@ -20,10 +20,29 @@ Resources:
   ACMCertValidationFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: src
+      CodeUri: src/
       Handler: index.handler
-      Runtime: python3.6
-      Timeout: 10
+      Runtime: python3.7
+      Description: DNS Validation Helper
+      MemorySize: 512
+      Timeout: 300
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - acm:DescribeCertificate
+                - acm:ListCertificates
+              Resource: '*'
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - logs:CreateLogGroup
+                - logs:CreateLogStream
+                - logs:PutLogEvents
+                - logs:DescribeLogStreams
+              Resource: '*'
 
 
 Outputs:
